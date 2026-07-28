@@ -69,6 +69,22 @@ python3 cli.py dashboard --projects-dir /path/to/projects --db /path/to/cache.db
 
 Pricing lives in [`pricing.json`](pricing.json). Edit it directly if model prices change or to add a new plan.
 
+### Splitting cost below the project slug
+
+A Claude Code "project" is just the folder a session was launched in, not the files it touched. If you work across several real projects from one launch directory — reaching one by absolute path, or managing a remote service over SSH — the **Projects** tab will lump all of that under a single slug.
+
+To split it back out, copy [`subprojects.example.json`](subprojects.example.json) to `~/.claude/token-dashboard-subprojects.json` and define named regex groups, e.g.:
+
+```json
+{
+  "groups": [
+    { "name": "My Remote App", "patterns": ["[\\\\/]var[\\\\/]www[\\\\/]my-app[\\\\/]", "my-app-host\\.example\\.com"] }
+  ]
+}
+```
+
+Each session's cost is then weighted by the share of its `Bash`/`Read`/`Edit`/`Write` tool-call targets matching each group's patterns, and split across those groups accordingly — the rest stays on the session's own slug. Nothing changes if you don't create this file. Override the path with `TOKEN_DASHBOARD_SUBPROJECTS`.
+
 ## CLI reference
 
 ```bash
@@ -76,6 +92,7 @@ python3 cli.py scan          # populate / refresh the local DB, then exit
 python3 cli.py today         # today's totals (terminal)
 python3 cli.py stats         # all-time totals (terminal)
 python3 cli.py tips          # active suggestions (terminal)
+python3 cli.py projects      # cost by project, split by subprojects.json if configured (terminal)
 python3 cli.py dashboard     # scan + serve the UI at http://localhost:8080
 
 # dashboard flags

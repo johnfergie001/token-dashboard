@@ -10,6 +10,10 @@ from pathlib import Path
 from token_dashboard.db import init_db, default_db_path, overview_totals
 from token_dashboard.scanner import scan_dir
 from token_dashboard.tips import all_tips
+from token_dashboard.pricing import load_pricing
+from token_dashboard.subprojects import project_cost_rows
+
+PRICING_JSON = Path(__file__).resolve().parent / "pricing.json"
 
 
 def _db_path(args) -> str:
@@ -70,6 +74,20 @@ def cmd_tips(args):
         print(f"  {tip['body']}\n")
 
 
+def cmd_projects(args):
+    db = _db_path(args)
+    init_db(db)
+    pricing = load_pricing(PRICING_JSON)
+    rows = project_cost_rows(db, pricing)
+    if not rows:
+        print("Token Dashboard: no sessions found")
+        return
+    split = rows[0]["subproject"]
+    print(f"Token Dashboard — cost by project{' (split via subprojects.json)' if split else ''}")
+    for r in rows:
+        print(f"  {r['project_name']:<32s} ${r['cost_usd']:>8.2f}   {r['sessions']:>3d} sessions   {r['turns']:>5d} turns")
+
+
 def cmd_dashboard(args):
     db = _db_path(args)
     init_db(db)
@@ -97,6 +115,7 @@ def main():
     sub.add_parser("today", parents=[common]).set_defaults(func=cmd_today)
     sub.add_parser("stats", parents=[common]).set_defaults(func=cmd_stats)
     sub.add_parser("tips",  parents=[common]).set_defaults(func=cmd_tips)
+    sub.add_parser("projects", parents=[common]).set_defaults(func=cmd_projects)
     d = sub.add_parser("dashboard", parents=[common])
     d.add_argument("--no-scan", action="store_true")
     d.add_argument("--no-open", action="store_true")

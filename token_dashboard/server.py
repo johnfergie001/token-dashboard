@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 from .db import (
-    overview_totals, expensive_prompts, project_summary,
+    overview_totals, expensive_prompts,
     tool_token_breakdown, recent_sessions, session_turns,
     daily_token_breakdown, model_breakdown, skill_breakdown,
 )
@@ -19,6 +19,7 @@ from .pricing import load_pricing, cost_for, get_plan, set_plan
 from .tips import all_tips, dismiss_tip
 from .scanner import scan_dir
 from .skills import cached_catalog
+from .subprojects import project_cost_rows
 
 
 WEB_ROOT = Path(__file__).resolve().parent.parent / "web"
@@ -110,7 +111,7 @@ def build_handler(db_path: str, projects_dir: str):
                     r["estimated_cost_usd"] = c["usd"]
                 return _send_json(self, rows)
             if path == "/api/projects":
-                return _send_json(self, project_summary(db_path, since, until))
+                return _send_json(self, project_cost_rows(db_path, pricing, since, until))
             if path == "/api/tools":
                 return _send_json(self, tool_token_breakdown(db_path, since, until))
             if path == "/api/sessions":

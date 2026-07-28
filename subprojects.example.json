@@ -1,0 +1,13 @@
+{
+  "_readme": "Copy this to ~/.claude/token-dashboard-subprojects.json (or point TOKEN_DASHBOARD_SUBPROJECTS at your own copy) and edit the groups below. Each 'patterns' entry is a Python regex tested against every Bash/Read/Edit/Write tool-call target in a session (case-insensitive). Anchor a leading [\\\\/] before the folder name so you don't match prose that mentions the project by name in an unrelated command. Do NOT require a trailing [\\\\/] too -- a lot of real signal is `cd \"/path/to/project\" && ...`, where nothing follows the folder name but a quote or `&&`, not another path segment. Use a trailing lookahead like (?=[\\\\/\\s\"'&;)]|$) instead so both 'continues as a path' and 'command ends here' count as a match. A session's cost is split across whichever groups its calls match, weighted by each group's share of that session's real tool calls; anything left over stays on the session's own Claude Code project slug.",
+  "groups": [
+    {
+      "name": "Example: a project you reach by absolute path",
+      "patterns": ["[\\\\/]MyProjectFolder(?=[\\\\/\\s\"'&;)]|$)"]
+    },
+    {
+      "name": "Example: a service you manage over SSH",
+      "patterns": ["[\\\\/]var[\\\\/]www[\\\\/]my-remote-app(?=[\\\\/\\s\"'&;)]|$)", "my-remote-app-hostname\\.example\\.com"]
+    }
+  ]
+}
